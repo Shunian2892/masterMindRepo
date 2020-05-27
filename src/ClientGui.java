@@ -191,7 +191,7 @@ public class ClientGui extends Application {
             e.printStackTrace();
         }
 
-        if (codeIsSet = true) {
+        if (codeIsSet) {
             two.appendText("Code has been SET!");
         }
     }
