@@ -9,6 +9,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -17,6 +18,7 @@ public class ClientGui extends Application {
     private String localHost = "localhost";
     private int portNum = 10000;
     private DataOutputStream out = null;
+    private DataInputStream in = null;
     private String nickName;
     boolean codeIsSet = false;
     private String codeToBreak = "";
@@ -86,10 +88,13 @@ public class ClientGui extends Application {
                     Socket socket = new Socket(localHost, portNum);
                     readMessages.appendText("You are now connected!\n");
                     out = new DataOutputStream(socket.getOutputStream());
+                    in = new DataInputStream(socket.getInputStream());
 
                     ReadThread threadReader = new ReadThread(socket, this);
+
                     Thread t = new Thread(threadReader);
                     t.start();
+
                 } catch (IOException ex){
                     ex.printStackTrace();
                 }
@@ -108,10 +113,10 @@ public class ClientGui extends Application {
             //Start a game
             if(writeMessages.getText().equals("player one")){
                 //TODO FIX THIS, RIGHT NOW PLAYER TWO CAN ALSO BE PLAYER ONE!! FIX ERRORCATCHING
-                if(!playerOneTaken){
-                    playerOneTaken = true;
+                if(playerOneTaken == false){
                     try {
                         out.writeUTF(nickName + " is player one!");
+                        playerOneTaken = true;
                     } catch (IOException ex){
                         ex.printStackTrace();
                     }
@@ -155,7 +160,6 @@ public class ClientGui extends Application {
                 ex.printStackTrace();
             }
         });
-
     }
 
     private void playerOneStage() {
@@ -191,7 +195,7 @@ public class ClientGui extends Application {
             e.printStackTrace();
         }
 
-        if (codeIsSet) {
+        if (codeIsSet = true) {
             two.appendText("Code has been SET!");
         }
     }

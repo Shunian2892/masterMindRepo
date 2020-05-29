@@ -12,12 +12,9 @@ public class ClientConnection implements Runnable{
     private DataOutputStream out;
     private boolean isRunning = true;
 
-    private int token;
-
     public ClientConnection(Socket socket, ServerGui server){
         this.socket = socket;
         this.server = server;
-        this.token = token;
     }
 
     @Override

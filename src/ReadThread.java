@@ -1,6 +1,7 @@
-import javafx.application.Platform;
+import javafx.stage.Stage;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -13,6 +14,8 @@ public class ReadThread implements Runnable {
     private Socket socket;
     private ClientGui gui;
     private DataInputStream in;
+    private DataOutputStream out;
+//    private boolean taken = false;
 
     public ReadThread(Socket socket, ClientGui gui){
         this.socket = socket;
@@ -24,14 +27,29 @@ public class ReadThread implements Runnable {
         while (true){
             try {
                 in = new DataInputStream(socket.getInputStream());
+                out = new DataOutputStream(socket.getOutputStream());
                 String receivedMessage = in.readUTF();
+
                 gui.readMessages.appendText(receivedMessage + "\n");
+//                checkPlayerOneTaken(receivedMessage);
             } catch (IOException e){
                 System.out.println("Cannot read message from server!\n"
-                + e.getMessage());
+                        + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void checkPlayerOneTaken(String receivedMessage) {
+        if (receivedMessage.equals("true")){
+            try {
+                out.writeBoolean(false);
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
     }
+
+
 }
