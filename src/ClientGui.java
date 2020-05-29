@@ -31,6 +31,7 @@ public class ClientGui extends Application {
         launch(ClientGui.class);
     }
 
+    //test
     @Override
     public void start(Stage primaryStage) throws Exception {
         //LOGIN SCENE
