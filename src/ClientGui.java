@@ -22,8 +22,8 @@ public class ClientGui extends Application {
     private String nickName;
     boolean codeIsSet = false;
     private String codeToBreak = "";
-    private boolean playerOneTaken = false;
-
+    private Stage playerOneStage;
+    private Stage playerTwoStage;
     public TextArea readMessages;
     public TextField writeMessages;
 
@@ -31,7 +31,6 @@ public class ClientGui extends Application {
         launch(ClientGui.class);
     }
 
-    //test
     @Override
     public void start(Stage primaryStage) throws Exception {
         //LOGIN SCENE
@@ -42,8 +41,8 @@ public class ClientGui extends Application {
         port.setEditable(false);
         hostAddress.setEditable(false);
         Label loginLabel = new Label("(nick)Name: ");
-        Label hostaddressLabel = new Label("Hostaddress ");
-        Label portLabel = new Label("Port ");
+        Label hostaddressLabel = new Label("Hostaddress: ");
+        Label portLabel = new Label("Port: ");
 
         VBox labels = new VBox();
         labels.getChildren().addAll(loginLabel, hostaddressLabel, portLabel );
@@ -79,6 +78,9 @@ public class ClientGui extends Application {
         chatPane.setBottom(writeAndSend);
         Scene chatScreen = new Scene(chatPane);
 
+        playerTwoStage = new Stage();
+        playerOneStage = new Stage();
+
 
         //BUTTON ACTIONS
         //LOGIN SCREEN BUTTON ACTION
@@ -86,6 +88,8 @@ public class ClientGui extends Application {
             if(!loginName.getText().isEmpty()){
                 nickName = loginName.getText();
                 try {
+                    primaryStage.setScene(chatScreen);
+
                     Socket socket = new Socket(localHost, portNum);
                     readMessages.appendText("You are now connected!\n");
                     out = new DataOutputStream(socket.getOutputStream());
@@ -99,7 +103,7 @@ public class ClientGui extends Application {
                 } catch (IOException ex){
                     ex.printStackTrace();
                 }
-                primaryStage.setScene(chatScreen);
+
             } else {
                 System.out.println("Please fill in all the boxes!");
             }
@@ -111,36 +115,6 @@ public class ClientGui extends Application {
             if(writeMessages.getText().isEmpty()){
                 return;
             }
-            //Start a game
-            if(writeMessages.getText().equals("player one")){
-                //TODO FIX THIS, RIGHT NOW PLAYER TWO CAN ALSO BE PLAYER ONE!! FIX ERRORCATCHING
-                if(playerOneTaken == false){
-                    try {
-                        out.writeUTF(nickName + " is player one!");
-                        playerOneTaken = true;
-                    } catch (IOException ex){
-                        ex.printStackTrace();
-                    }
-                    playerOneStage();
-
-                } else {
-                    try {
-                        out.writeUTF("Player one is taken! " + nickName + " is player 2!");
-                    } catch (IOException ex){
-                        ex.printStackTrace();
-                    }
-                    playerTwoStage();
-                }
-            }
-
-            if(writeMessages.getText().equals("player two")){
-                try {
-                    out.writeUTF(nickName + " is player two!");
-                } catch (IOException ex){
-                    ex.printStackTrace();
-                }
-                playerTwoStage();
-            }
 
             //Quit and disconnect from the sever
             if(writeMessages.getText().equals("quit")){
@@ -148,7 +122,6 @@ public class ClientGui extends Application {
                     out.writeUTF("<" + nickName + "> has disconnected!");
                     writeMessages.setEditable(false);
 //                    primaryStage.close();
-
                 } catch (IOException ex){
                     ex.printStackTrace();
                 }
@@ -163,41 +136,43 @@ public class ClientGui extends Application {
         });
     }
 
-    private void playerOneStage() {
+    protected void playerOneStage() {
         //PLAYER ONE STAGE SETUP
         PlayerOneStage one = new PlayerOneStage();
-        Stage gameStage = new Stage();
-
         try{
-            one.start(gameStage);
+            one.start(playerOneStage);
         } catch (Exception e){
             e.printStackTrace();
         }
 
         one.appendText("Welcome!");
 
-        codeToBreak = one.getCodeToBreak();
+//        codeToBreak = one.getCodeToBreak();
         if(one.isHasBeenSet()){
             one.appendText("Code has been SET!!");
-            codeIsSet = true;
-            System.out.println(codeToBreak);
+//            codeIsSet = true;
+//            System.out.println(codeToBreak);
         }
     }
 
 
-    private void playerTwoStage() {
+    protected void playerTwoStage() {
         //PLAYER TWO STAGE SETUP
         PlayerTwoStage two = new PlayerTwoStage();
-        Stage playerTwoStage = new Stage();
-
         try {
             two.start(playerTwoStage);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        if (codeIsSet = true) {
-            two.appendText("Code has been SET!");
-        }
+        two.appendText("Welcome!");
+
+//        if (codeIsSet) {
+        two.appendText("Code has been SET!");
+
+    }
+
+    public String getNickName() {
+        return nickName;
     }
 }

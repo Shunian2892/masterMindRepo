@@ -21,17 +21,43 @@ public class ClientConnection implements Runnable{
     public void run() {
 
         try {
-            in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
+            in = new DataInputStream(socket.getInputStream());
 
             while (isRunning){
                 String receivingMessage = in.readUTF();
+                System.out.println(receivingMessage);
                 server.sendToAllClients(receivingMessage);
                 server.ta.appendText(receivingMessage + "\n");
 
                 if(receivingMessage.equals("quit")){
                     server.removeClient(this);
                 }
+
+                if(receivingMessage.contains("player one")){
+                    if(!server.isPlayerOne()){
+                        server.setPlayerOne(true);
+                        out.writeUTF("You are player one!");
+                        continue;
+                    } else {
+                        out.writeUTF("Player one taken!");
+                        continue;
+                    }
+                }
+
+                if (receivingMessage.contains("player two")){
+                    if(!server.isPlayerTwo()){
+                        server.setPlayerTwo(true);
+                        out.writeUTF("You are player two!");
+                        continue;
+                    } else {
+                        out.writeUTF("Player two is taken!");
+                        continue;
+                    }
+                }
+
+                out.writeUTF("Received");
+                System.out.println("Here!");
             }
         } catch (IOException e){
             e.printStackTrace();
