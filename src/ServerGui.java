@@ -4,7 +4,6 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -14,7 +13,7 @@ public class ServerGui extends Application {
     private int port = 10000;
     private ServerSocket serverSocket;
     private Socket socket;
-    private DataInputStream in;
+    private boolean playerOne = false, playerTwo = false;
 
     public TextArea ta;
 
@@ -39,7 +38,7 @@ public class ServerGui extends Application {
 
                 while (isRunning) {
 
-                    if (connections.size() < 3) {
+                    if (connections.size() < 2) {
                         ta.appendText("Waiting for client\n");
 
                         this.socket = serverSocket.accept();
@@ -69,19 +68,19 @@ public class ServerGui extends Application {
         this.connections.remove(clientConnection);
     }
 
-//
-//    public void writeStringToSocket(Socket socket, String text) {
-//
-//        try {
-//            socket.getOutputStream().write(text.getBytes());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    public synchronized boolean isPlayerOne() {
+        return playerOne;
+    }
 
-//    public ArrayList<MasterMind_ServerClient> getClients() {
-//        return clients;
-//    }
+    public synchronized void setPlayerOne(boolean playerOne) {
+        this.playerOne = playerOne;
+    }
 
+    public synchronized boolean isPlayerTwo() {
+        return playerTwo;
+    }
 
+    public synchronized void setPlayerTwo(boolean playerTwo) {
+        this.playerTwo = playerTwo;
+    }
 }
