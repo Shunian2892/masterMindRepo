@@ -1,6 +1,8 @@
-import javafx.application.Platform;
+
+import javafx.stage.Stage;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -13,6 +15,7 @@ public class ReadThread implements Runnable {
     private Socket socket;
     private ClientGui gui;
     private DataInputStream in;
+    private DataOutputStream out;
 
     public ReadThread(Socket socket, ClientGui gui){
         this.socket = socket;
@@ -21,17 +24,39 @@ public class ReadThread implements Runnable {
 
     @Override
     public void run() {
+
         while (true){
             try {
                 in = new DataInputStream(socket.getInputStream());
+                out = new DataOutputStream(socket.getOutputStream());
                 String receivedMessage = in.readUTF();
-                gui.readMessages.appendText(receivedMessage + "\n");
+                System.out.println(receivedMessage);
+
+                //TODO new problem, mastermind stages dont open + chat stops working
+                System.out.println("reached");
+
+                if (receivedMessage.equals("You are player one!")) {
+                    out.writeUTF(gui.getNickName() + " is player one!");
+                    gui.playerOneStage();
+                } else if (receivedMessage.equals("You are player two!")) {
+                    out.writeUTF(gui.getNickName() + " is player two!");
+                    gui.playerTwoStage();
+                } else if (receivedMessage.equals("Player one is taken!")) {
+                    out.writeUTF("Player one is taken! " + gui.getNickName() + " is player 2!");
+                    gui.playerTwoStage();
+                } else if (receivedMessage.equals("Player two is taken!")) {
+                    out.writeUTF(gui.getNickName() + " is player one!");
+                    gui.playerOneStage();
+                } else if(!receivedMessage.equals("Received")){
+                    gui.readMessages.appendText(receivedMessage + "\n");
+                }
             } catch (IOException e){
                 System.out.println("Cannot read message from server!\n"
-                + e.getMessage());
+                        + e.getMessage());
                 e.printStackTrace();
             }
         }
-
     }
+
+
 }
