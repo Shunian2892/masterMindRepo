@@ -15,18 +15,17 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class PlayerOneStage extends Application {
-    Button red = new Button("RED");
-    Button blue = new Button("BLUE");
-    Button green = new Button(  "GREEN");
-    Button purple = new Button("PURPLE");
-    Button yellow = new Button("YELLOW");
-    Button orange = new Button("ORANGE");
-
+    private Button red;
+    private Button blue;
+    private Button green;
+    private Button purple;
+    private Button yellow;
+    private Button orange;
 
     private BorderPane gamePane;
     private VBox allColors;
 
-    private TextArea gameArea = new TextArea();
+    TextArea gameArea = new TextArea();
     private Label colors = new Label("");
     private Button setCode;
     private Button clearCode;
@@ -35,19 +34,38 @@ public class PlayerOneStage extends Application {
 
     private String codeToBreak = "";
     private String colorsUnfinished = "";
-    private  String colorsFinished = "";
+    private String colorsFinished = "";
 
     private String feedback = "";
     private String feedbackUnfinished = "";
-    private  String feedbackFinished = "";
+    private String feedbackFinished = "";
 
     private int amOfColors = 0;
     private int amOfFeedback = 0;
 
     private boolean hasBeenSet = false;
 
+    private Socket socket;
+    private DataOutputStream out;
+
+    public PlayerOneStage(Socket s){
+        this.socket = s;
+
+        try {
+            out = new DataOutputStream(socket.getOutputStream());
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
+        red = new Button("RED");
+        blue = new Button("BLUE");
+        green = new Button(  "GREEN");
+        purple = new Button("PURPLE");
+        yellow = new Button("YELLOW");
+        orange = new Button("ORANGE");
         gamePane = new BorderPane();
         HBox topColors = new HBox();
         HBox bottomColors = new HBox();
@@ -56,7 +74,6 @@ public class PlayerOneStage extends Application {
         setCode = new Button("Done");
         clearCode = new Button("clear");
         Label yourCode = new Label("Your 4 colored code: ");
-
 
         red.setStyle("-fx-background-color: #f54242; ");
         red.setMaxSize(200, 100);
@@ -92,9 +109,7 @@ public class PlayerOneStage extends Application {
         primaryStage.show();
 
         colorButtonActions();
-
     }
-
 
     public void setColorLabel(String text) {
         if(amOfColors <4){
@@ -152,6 +167,12 @@ public class PlayerOneStage extends Application {
             this.feedback = feedbackLabel.getText();
             appendText("your feedback is: " + this.feedback);
 
+            try{
+                out.writeUTF("Player one made a move");
+                out.writeUTF("P1: " + this.feedback);
+            } catch (IOException e){
+                e.printStackTrace();
+            }
         });
         clearFeedback.setOnAction(action->{
             clearFeedback();
@@ -178,6 +199,14 @@ public class PlayerOneStage extends Application {
             setCodeToBreak(codeToBreak);
             appendText("CODE HAS BEEN SET!");
             appendText("your code is: " +  codeToBreak);
+
+            try{
+                out.writeUTF("Player one made a move");
+                out.writeUTF("P1: CODE HAS BEEN SET!");
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+
             hasBeenSet = true;
             disable(setCode);
             disable(clearCode);
