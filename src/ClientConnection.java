@@ -60,6 +60,14 @@ public class ClientConnection implements Runnable{
                         continue;
                     }
                 }
+                if(receivingMessage.equals("player one closed their game")){
+                    server.setPlayerOne(false);
+                    continue;
+                }
+                if(receivingMessage.equals("player two closed their game")){
+                    server.setPlayerTwo(false);
+                    continue;
+                }
 
                 out.writeUTF("Received");
             }
