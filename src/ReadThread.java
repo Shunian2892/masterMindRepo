@@ -1,4 +1,6 @@
 
+import javafx.stage.Stage;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -34,22 +36,38 @@ public class ReadThread implements Runnable {
 
                 System.out.println("reached");
 
+                //opens playeronestage for the client who typed player one
                 if (receivedMessage.equals("You are player one!")) {
                     out.writeUTF(gui.getNickName() + " is player one!");
                     gui.playerOneStage();
-                } else if (receivedMessage.equals("You are player two!")) {
+                } //opens playertwostage for the client who typed player two
+                else if (receivedMessage.equals("You are player two!")) {
                     out.writeUTF(gui.getNickName() + " is player two!");
                     gui.playerTwoStage();
                 } else if (receivedMessage.equals("Player one is taken!")) {
                 } else if (receivedMessage.equals("Player two is taken!")) {
 
-                } else if (receivedMessage.startsWith("P2:")){
+                } //opens rules when typed in the chat
+                else if(receivedMessage.endsWith("rules")){
+                        gui.rulesStage();
+                }//sends the messages from player two to player one
+                else if (receivedMessage.startsWith("P2:")){
                     gui.stageOneAppendText(receivedMessage);
-                } else if(receivedMessage.startsWith("P1: ")) {
+                } //sends the messages from player one to player two
+                else if(receivedMessage.startsWith("P1: ")) {
                     gui.stageTwoAppendText(receivedMessage);
-                } else if(!receivedMessage.equals("Received")){
+                } //interpets the text from playeronestage to show that codemaker has won
+                else if(receivedMessage.endsWith("CODEMAKER")){
+                    gui.stageTwoAppendText("THE WINNER IS THE CODEMAKER");
+                    gui.stageOneAppendText("The WINNER IS THE CODEMAKER");
+                } //interpets the text from playeronestage to show that codebreaker has won
+                else if(receivedMessage.equals("CODEBREAKER")){
+                    gui.stageTwoAppendText("THE WINNER IS THE CODEBREAKER");
+                    gui.stageOneAppendText("The WINNER IS THE CODEBREAKER");
+                } else if(!receivedMessage.equals("Received")) {
                     gui.readMessages.appendText(receivedMessage + "\n");
                 }
+
 
             } catch (IOException e){
                 System.out.println("Cannot read message from server!\n"
