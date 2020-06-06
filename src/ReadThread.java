@@ -32,7 +32,6 @@ public class ReadThread implements Runnable {
                 String receivedMessage = in.readUTF();
                 System.out.println(receivedMessage);
 
-                //TODO new problem, mastermind stages dont open + chat stops working
                 System.out.println("reached");
 
                 if (receivedMessage.equals("You are player one!")) {

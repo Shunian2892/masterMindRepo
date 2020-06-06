@@ -20,6 +20,7 @@ public class ClientGui extends Application {
     private int portNum = 10000;
     private DataOutputStream out = null;
     private DataInputStream in = null;
+
     private String nickName;
     boolean codeIsSet = false;
     private String codeToBreak = "";
@@ -81,7 +82,6 @@ public class ClientGui extends Application {
 
         playerTwoStage = new Stage();
         playerOneStage = new Stage();
-
 
         //BUTTON ACTIONS
         //LOGIN SCREEN BUTTON ACTION
