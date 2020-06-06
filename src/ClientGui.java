@@ -1,4 +1,5 @@
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -19,6 +20,7 @@ public class ClientGui extends Application {
     private int portNum = 10000;
     private DataOutputStream out = null;
     private DataInputStream in = null;
+
     private String nickName;
     boolean codeIsSet = false;
     private String codeToBreak = "";
@@ -81,7 +83,6 @@ public class ClientGui extends Application {
         playerTwoStage = new Stage();
         playerOneStage = new Stage();
 
-
         //BUTTON ACTIONS
         //LOGIN SCREEN BUTTON ACTION
         buttonLogin.setOnAction(e -> {
@@ -138,38 +139,38 @@ public class ClientGui extends Application {
 
     protected void playerOneStage() {
         //PLAYER ONE STAGE SETUP
-        PlayerOneStage one = new PlayerOneStage();
-        try{
-            one.start(playerOneStage);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
+        Platform.runLater( () -> {
+            PlayerOneStage one = new PlayerOneStage();
+            try{
+                one.start(playerOneStage);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
 
-        one.appendText("Welcome!");
+            one.appendText("Welcome!");
 
-//        codeToBreak = one.getCodeToBreak();
-        if(one.isHasBeenSet()){
-            one.appendText("Code has been SET!!");
-//            codeIsSet = true;
-//            System.out.println(codeToBreak);
-        }
+            if(one.isHasBeenSet()){
+                one.appendText("Code has been SET!!");
+            }
+        });
+
     }
-
 
     protected void playerTwoStage() {
         //PLAYER TWO STAGE SETUP
-        PlayerTwoStage two = new PlayerTwoStage();
-        try {
-            two.start(playerTwoStage);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Platform.runLater(() -> {
+            PlayerTwoStage two = new PlayerTwoStage();
+            try {
+                two.start(playerTwoStage);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-        two.appendText("Welcome!");
+            two.appendText("Welcome!");
 
-//        if (codeIsSet) {
-        two.appendText("Code has been SET!");
 
+            two.appendText("Code has been SET!");
+        });
     }
 
     public String getNickName() {
