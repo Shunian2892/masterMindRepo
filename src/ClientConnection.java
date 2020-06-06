@@ -34,7 +34,7 @@ public class ClientConnection implements Runnable{
                     server.removeClient(this);
                 }
 
-                if(receivingMessage.contains("player one")){
+                if(receivingMessage.endsWith("player one")){
                     if(!server.isPlayerOne()){
                         server.setPlayerOne(true);
                         out.writeUTF("You are player one!");
@@ -45,7 +45,7 @@ public class ClientConnection implements Runnable{
                     }
                 }
 
-                if (receivingMessage.contains("player two")){
+                if (receivingMessage.endsWith("player two")){
                     if(!server.isPlayerTwo()){
                         server.setPlayerTwo(true);
                         out.writeUTF("You are player two!");
@@ -57,7 +57,7 @@ public class ClientConnection implements Runnable{
                 }
 
                 out.writeUTF("Received");
-                System.out.println("Here!");
+                //System.out.println("Here!");
             }
         } catch (IOException e){
             e.printStackTrace();
