@@ -57,7 +57,7 @@ public class ClientConnection implements Runnable{
                 }
 
                 out.writeUTF("Received");
-                System.out.println("Here!");
+                //System.out.println("Here!");
             }
         } catch (IOException e){
             e.printStackTrace();
