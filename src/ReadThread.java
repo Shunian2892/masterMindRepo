@@ -1,6 +1,4 @@
 
-import javafx.stage.Stage;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -16,6 +14,8 @@ public class ReadThread implements Runnable {
     private ClientGui gui;
     private DataInputStream in;
     private DataOutputStream out;
+    private PlayerOneStage stageOne;
+    private PlayerTwoStage stageTwo;
 
     public ReadThread(Socket socket, ClientGui gui){
         this.socket = socket;
@@ -42,9 +42,15 @@ public class ReadThread implements Runnable {
                     gui.playerTwoStage();
                 } else if (receivedMessage.equals("Player one is taken!")) {
                 } else if (receivedMessage.equals("Player two is taken!")) {
+
+                } else if (receivedMessage.startsWith("P2:")){
+                    gui.stageOneAppendText(receivedMessage);
+                } else if(receivedMessage.startsWith("P1: ")) {
+                    gui.stageTwoAppendText(receivedMessage);
                 } else if(!receivedMessage.equals("Received")){
                     gui.readMessages.appendText(receivedMessage + "\n");
                 }
+
             } catch (IOException e){
                 System.out.println("Cannot read message from server!\n"
                         + e.getMessage());

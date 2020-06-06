@@ -28,6 +28,11 @@ public class ClientGui extends Application {
     private Stage playerTwoStage;
     public TextArea readMessages;
     public TextField writeMessages;
+    private Socket socket;
+    private ReadThread threadReader;
+
+    private PlayerOneStage one;
+    private PlayerTwoStage two;
 
     public static void main(String[] args) {
         launch(ClientGui.class);
@@ -91,15 +96,18 @@ public class ClientGui extends Application {
                 try {
                     primaryStage.setScene(chatScreen);
 
-                    Socket socket = new Socket(localHost, portNum);
+                    socket = new Socket(localHost, portNum);
                     readMessages.appendText("You are now connected!\n");
                     out = new DataOutputStream(socket.getOutputStream());
                     in = new DataInputStream(socket.getInputStream());
 
-                    ReadThread threadReader = new ReadThread(socket, this);
+                    threadReader = new ReadThread(socket, this);
 
                     Thread t = new Thread(threadReader);
                     t.start();
+
+                    one = new PlayerOneStage(this.socket);
+                    two = new PlayerTwoStage(this.socket);
 
                 } catch (IOException ex){
                     ex.printStackTrace();
@@ -137,43 +145,46 @@ public class ClientGui extends Application {
         });
     }
 
+    //PLAYER ONE STAGE SETUP
     protected void playerOneStage() {
-        //PLAYER ONE STAGE SETUP
         Platform.runLater( () -> {
-            PlayerOneStage one = new PlayerOneStage();
+
             try{
                 one.start(playerOneStage);
             } catch (Exception e){
                 e.printStackTrace();
             }
-
-            one.appendText("Welcome!");
-
-            if(one.isHasBeenSet()){
-                one.appendText("Code has been SET!!");
-            }
+            one.appendText("Welcome");
+//            stageOneAppendText("Welcome");
         });
 
     }
 
+    protected void stageOneAppendText(String text){
+        one.gameArea.appendText(text + "\n");
+    }
+
+    //PLAYER TWO STAGE SETUP
     protected void playerTwoStage() {
-        //PLAYER TWO STAGE SETUP
         Platform.runLater(() -> {
-            PlayerTwoStage two = new PlayerTwoStage();
+
             try {
                 two.start(playerTwoStage);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            two.appendText("Welcome!");
-
-
-            two.appendText("Code has been SET!");
+            two.appendText("Welcome");
+//            stageTwoAppendText("Welcome");
         });
+    }
+
+    protected void stageTwoAppendText(String text){
+        two.gameArea.appendText(text + "\n");
     }
 
     public String getNickName() {
         return nickName;
     }
+
+
 }
