@@ -29,6 +29,7 @@ public class ClientConnection implements Runnable{
                 System.out.println(receivingMessage);
                 server.sendToAllClients(receivingMessage);
                 server.ta.appendText(receivingMessage + "\n");
+                out.flush();
 
                 if(receivingMessage.equals("quit")){
                     server.removeClient(this);
@@ -38,9 +39,11 @@ public class ClientConnection implements Runnable{
                     if(!server.isPlayerOne()){
                         server.setPlayerOne(true);
                         out.writeUTF("You are player one!");
+                        out.flush();
                         continue;
                     } else {
                         out.writeUTF("Player one taken!");
+                        out.flush();
                         continue;
                     }
                 }
@@ -49,15 +52,16 @@ public class ClientConnection implements Runnable{
                     if(!server.isPlayerTwo()){
                         server.setPlayerTwo(true);
                         out.writeUTF("You are player two!");
+                        out.flush();
                         continue;
                     } else {
                         out.writeUTF("Player two is taken!");
+                        out.flush();
                         continue;
                     }
                 }
 
                 out.writeUTF("Received");
-                //System.out.println("Here!");
             }
         } catch (IOException e){
             e.printStackTrace();
