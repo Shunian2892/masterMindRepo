@@ -165,23 +165,26 @@ public class PlayerOneStage extends Application {
         setCode.setOnAction(action -> {
             codeToBreak = colors.getText();
             setCodeToBreak(codeToBreak);
-            appendText("CODE HAS BEEN SET!");
-            appendText("Your code is: " +  codeToBreak);
-            try{
-                out.writeUTF("Player one made a move");
-                out.writeUTF("P1: CODE HAS BEEN SET!");
-            } catch (IOException e){
-                e.printStackTrace();
+            if(amOfColors < 4){
+                appendText("The code must be 4 colors long");
+            } else {
+                appendText("CODE HAS BEEN SET!");
+                appendText("Your code is: " +  codeToBreak);
+                try{
+                    out.writeUTF("Player one has made a move");
+                    out.writeUTF("P1: CODE HAS BEEN SET!");
+                } catch (IOException e){
+                    e.printStackTrace();
+                }
+
+                disable(setCode);
+                disable(clearCode);
+                //create new buttons for feedback
+                HBox colorsAndFeedback = new HBox();
+
+                colorsAndFeedback.getChildren().addAll(allColors,getFeedbackLayout());
+                gamePane.setBottom(colorsAndFeedback);
             }
-
-            disable(setCode);
-            disable(clearCode);
-
-            //create new buttons for feedback
-            HBox colorsAndFeedback = new HBox();
-
-            colorsAndFeedback.getChildren().addAll(allColors,getFeedbackLayout());
-            gamePane.setBottom(colorsAndFeedback);
         });
 
         clearCode.setOnAction(action ->{
@@ -243,27 +246,30 @@ public class PlayerOneStage extends Application {
 
         //Set the feedback button action and increase turn amount by 1
         setFeedback.setOnAction(action -> {
-            amOfTurns++;
             this.feedback = feedbackLabel.getText();
-            appendText("Your feedback is: " + this.feedback);
-
-            //Write to ReadThread that the player has made a move
-            try{
-                out.writeUTF("Player one has made a move");
-                out.writeUTF("P1: " + this.feedback);
-                //If everything is right it writes a message that the ReadThread interprets
-                if(this.feedback.equals("black black black black ")){
-                    out.writeUTF("CODEBREAKER");
-                    disable(setFeedback);
-                    disable(clearFeedback);
-                }//12 is the maximum of turns then it writes a messages that the readthread interperts
-                else if(amOfTurns == 12){
-                    out.writeUTF("CODEMAKER");
-                    disable(setFeedback);
-                    disable(clearFeedback);
+            if(amOfFeedback < 4){
+                appendText("The feedback must be 4 colors long");
+            } else {
+                appendText("Your feedback is: " + this.feedback);
+                //Write to ReadThread that the player has made a move
+                try{
+                    amOfTurns++;
+                    out.writeUTF("Player one has made a move");
+                    out.writeUTF("P1: " + this.feedback);
+                    //If everything is right it writes a message that the ReadThread interprets
+                    if(this.feedback.equals("black black black black ")){
+                        out.writeUTF("CODEBREAKER");
+                        disable(setFeedback);
+                        disable(clearFeedback);
+                    }//12 is the maximum of turns then it writes a messages that the ReadThread interprets
+                    else if(amOfTurns == 12){
+                        out.writeUTF("CODEMAKER");
+                        disable(setFeedback);
+                        disable(clearFeedback);
+                    }
+                } catch (IOException e){
+                    e.printStackTrace();
                 }
-            } catch (IOException e){
-                e.printStackTrace();
             }
             //Feedback cleared after sending it
             clearFeedback();

@@ -148,35 +148,38 @@ public class PlayerTwoStage extends Application {
 
         setCode.setOnAction(action -> {
             codeToBreak = colors.getText();
-            appendText(codeToBreak);
-            try{
-                amOfTurns++;
-                out.writeUTF("Player two made a move");
-                out.writeUTF("P2: " + codeToBreak);
-
-                if(amOfTurns == 11){
-                    out.writeUTF("LAST TRY");
-                    out.writeUTF("Player two made a move");
+            if(amOfColors < 4){
+                appendText("The code must be 4 colors long");
+            } else {
+                appendText(codeToBreak);
+                try{
+                    amOfTurns++;
+                    out.writeUTF("Player two has made a move");
                     out.writeUTF("P2: " + codeToBreak);
-                }
 
-                if (amOfTurns == 12){
-                    disable(setCode);
-                    disable(clearCode);
+                    if(amOfTurns == 11){
+                        out.writeUTF("LAST TRY");
+                        out.writeUTF("Player two has made a move");
+                        out.writeUTF("P2: " + codeToBreak);
+                    }
+
+                    if (amOfTurns == 12){
+                        disable(setCode);
+                        disable(clearCode);
+                    }
+                } catch (IOException e){
+                    e.printStackTrace();
                 }
-            } catch (IOException e){
-                e.printStackTrace();
             }
+
             //Colors cleared after sending it
             clearColorCode();
-
         });
 
         //Manually cleat code
         clearCode.setOnAction(action ->{
             clearColorCode();
         });
-
     }
 
     //Set max amount of colors clicked to 4
