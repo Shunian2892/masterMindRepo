@@ -9,6 +9,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+/**
+ * Start a server on port 10000 and look for clients.
+ * Each connection made is stores in an arrayList such that a message from one person can be send to all the other clients on the server
+ */
 public class ServerGui extends Application {
     private int port = 10000;
     private ServerSocket serverSocket;
@@ -50,7 +54,6 @@ public class ServerGui extends Application {
                         t.start();
                     }
                 }
-
                 this.serverSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -58,16 +61,19 @@ public class ServerGui extends Application {
         }).start();
     }
 
+    //Send a message to all clients in the server
     public void sendToAllClients(String text) {
         for (ClientConnection client: connections){
             client.sendMessage(text);
         }
     }
 
+    //Remove a specific client from the server
     public void removeClient(ClientConnection clientConnection){
         this.connections.remove(clientConnection);
     }
 
+    //Getters and Setters of the booleans isPlayerOne and isPlayerTwo
     public synchronized boolean isPlayerOne() {
         return playerOne;
     }
