@@ -8,29 +8,34 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
+/**
+ * GUI for the game mastermind specifically for the player who guesses the color code.
+ */
 public class PlayerTwoStage extends Application {
-    private Button red;
-    private Button blue;
-    private Button green;
-    private Button purple;
-    private Button yellow;
-    private Button orange;
-    private Button setCode;
-    private Button clearCode;
+    private Button red,
+            blue,
+            green,
+            purple,
+            yellow,
+            orange,
+            setCode,
+            clearCode;
+
+    private BorderPane gamePane;
 
     TextArea gameArea;
-    Label colors;
+    private Label colors;
 
-    private String codeToBreak;
-    String colorsUnfinished;
-    String colorsFinished;
+    private String codeToBreak,
+            colorsUnfinished,
+            colorsFinished;
 
-    int amOfColors;
+    private int amOfColors,
+            amOfTurns;
 
     private Socket socket;
     private DataOutputStream out;
@@ -43,32 +48,17 @@ public class PlayerTwoStage extends Application {
         } catch (IOException e){
             e.printStackTrace();
         }
-        gameArea = new TextArea();
-        colors = new Label("");
 
-        codeToBreak = "";
-        colorsUnfinished = "";
-        colorsFinished = "";
-
-        amOfColors = 0;
+        initializeVariables();
     }
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
+    private void initializeVariables() {
         red = new Button("RED");
         blue = new Button("BLUE");
         green = new Button(  "GREEN");
         purple = new Button("PURPLE");
         yellow = new Button("YELLOW");
         orange = new Button("ORANGE");
-        BorderPane gamePane = new BorderPane();
-        HBox topColors = new HBox();
-        HBox bottomColors = new HBox();
-        VBox allColors = new VBox();
-        HBox doneOrClear = new HBox();
-        setCode = new Button("send");
-        clearCode = new Button("clear");
-        Label yourCode = new Label("Your guess is: ");
 
         red.setStyle("-fx-background-color: #f54242; ");
         red.setMaxSize(200, 100);
@@ -88,22 +78,56 @@ public class PlayerTwoStage extends Application {
         yellow.setStyle("-fx-background-color: #f2e338; ");
         yellow.setMaxSize(200, 100);
 
+        gameArea = new TextArea();
+        colors = new Label("");
+
+        codeToBreak = "";
+        colorsUnfinished = "";
+        colorsFinished = "";
+
+        gamePane = new BorderPane();
+        gameArea = new TextArea();
+        colors = new Label("");
+
+        setCode = new Button("Done");
+        clearCode = new Button("clear");
+
+        amOfTurns = 0;
+        amOfColors = 0;
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        HBox topColors = new HBox();
+        HBox bottomColors = new HBox();
+        VBox allColors = new VBox();
+        HBox doneOrClear = new HBox();
+
+        Label yourCode = new Label("Your guess is: ");
+
         doneOrClear.getChildren().addAll(setCode,clearCode);
+
         topColors.getChildren().addAll(red, blue, green);
         topColors.setSpacing(20);
+
         bottomColors.getChildren().addAll(purple, yellow, orange);
         bottomColors.setSpacing(20);
+
         allColors.getChildren().addAll(yourCode, colors, topColors, bottomColors, doneOrClear);
 
         gamePane.setCenter(gameArea);
         gameArea.setEditable(false);
         gamePane.setBottom(allColors);
+
         Scene gameScene = new Scene(gamePane, 500, 700);
         primaryStage.setScene(gameScene);
+        primaryStage.setResizable(false);
         primaryStage.setTitle("MasterMind player two");
         primaryStage.show();
 
-        colorButtonActions();
+        buttonActions();
+
+        //When the stage is closed it writes a message to the server
         primaryStage.setOnCloseRequest(action->{
             try {
                 out.writeUTF("player two closed their game");
@@ -113,39 +137,51 @@ public class PlayerTwoStage extends Application {
         });
     }
 
-    //PLAYER TWO STAGE BUTTON ACTIONS
-    private void colorButtonActions() {
+    //Player two stage button actions
+    private void buttonActions() {
         red.setOnAction(action ->{ setColorLabel("red"); });
-
         blue.setOnAction(action ->{ setColorLabel("blue"); });
-
         green.setOnAction(action ->{ setColorLabel("green"); });
-
         yellow.setOnAction(action ->{ setColorLabel("yellow"); });
-
         purple.setOnAction(action ->{ setColorLabel("purple"); });
-
         orange.setOnAction(action ->{ setColorLabel("orange"); });
 
         setCode.setOnAction(action -> {
             codeToBreak = colors.getText();
             appendText(codeToBreak);
             try{
+                amOfTurns++;
                 out.writeUTF("Player two made a move");
                 out.writeUTF("P2: " + codeToBreak);
+
+                if(amOfTurns == 11){
+                    out.writeUTF("LAST TRY");
+                    out.writeUTF("Player two made a move");
+                    out.writeUTF("P2: " + codeToBreak);
+                }
+
+                if (amOfTurns == 12){
+                    out.writeUTF("CODEMAKER");
+                    disable(setCode);
+                    disable(clearCode);
+                }
             } catch (IOException e){
                 e.printStackTrace();
             }
+            //Colors cleared after sending it
             clearColorCode();
+
         });
 
+        //Manually cleat code
         clearCode.setOnAction(action ->{
             clearColorCode();
         });
 
     }
 
-    public void setColorLabel(String text) {
+    //Set max amount of colors clicked to 4
+    private void setColorLabel(String text) {
         if(amOfColors <4){
             amOfColors++;
             colorsUnfinished = colorsFinished + text + " ";
@@ -154,18 +190,21 @@ public class PlayerTwoStage extends Application {
         }
     }
 
-    public void appendText(String text){
+    //Appends text to the game area
+    void appendText(String text){
         gameArea.appendText(text + "\n");
     }
 
-    public void clearColorCode(){
+    //Clears color code label
+    private void clearColorCode(){
         amOfColors= 0;
         colors.setText("");
         colorsFinished = "";
         colorsUnfinished = "";
     }
 
-    public String getCodeToBreak() {
-        return codeToBreak;
+    //Disables the usage off a button
+    private void disable(Button button){
+        button.setDisable(true);
     }
 }
