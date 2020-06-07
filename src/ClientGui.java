@@ -10,7 +10,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -28,6 +27,7 @@ public class ClientGui extends Application {
     public TextField writeMessages;
     private Socket socket;
     private ReadThread threadReader;
+    private Button send;
 
     private PlayerOneStage one;
     private PlayerTwoStage two;
@@ -74,7 +74,7 @@ public class ClientGui extends Application {
         writeMessages = new TextField();
         writeMessages.setPrefWidth(500);
         readMessages = new TextArea();
-        Button send = new Button("Send");
+        send = new Button("Send");
 
         BorderPane chatPane = new BorderPane();
         chatPane.setCenter(readMessages);
@@ -198,5 +198,10 @@ public class ClientGui extends Application {
                 e.printStackTrace();
             }
         });
+    }
+
+    protected void disable(){
+        send.setDisable(true);
+        writeMessages.setEditable(false);
     }
 }

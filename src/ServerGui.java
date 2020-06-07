@@ -17,7 +17,7 @@ public class ServerGui extends Application {
     private int port = 10000;
     private ServerSocket serverSocket;
     private Socket socket;
-    private boolean playerOne = false, playerTwo = false;
+    private boolean playerOne = false, playerTwo = false, isFull = false;
 
     public TextArea ta;
 
@@ -35,24 +35,25 @@ public class ServerGui extends Application {
         ta.appendText("Starting mastermind server...\n");
         ta.appendText("BackLog of events and messages:\n");
 
+        //Make and start a new thread. Check if conncetions.size is higher than 2, of so, set isFull on true such that new clients can't chat and start a game.
         new Thread( () -> {
             try {
                 this.serverSocket = new ServerSocket(port);
                 boolean isRunning = true;
 
                 while (isRunning) {
+                    ta.appendText("Waiting for client\n");
+                    this.socket = serverSocket.accept();
+                    ta.appendText("Client connected via address: " + socket.getInetAddress().getHostAddress() + "\n");
 
-                    if (connections.size() < 2) {
-                        ta.appendText("Waiting for client\n");
-
-                        this.socket = serverSocket.accept();
-                        ta.appendText("Client connected via address: " + socket.getInetAddress().getHostAddress() + "\n");
-
-                        ClientConnection connection = new ClientConnection(socket, this);
-                        connections.add(connection);
-                        Thread t = new Thread(connection);
-                        t.start();
+                    if(connections.size() > 2){
+                        isFull = true;
                     }
+
+                    ClientConnection connection = new ClientConnection(socket, this, isFull);
+                    connections.add(connection);
+                    Thread t = new Thread(connection);
+                    t.start();
                 }
                 this.serverSocket.close();
             } catch (IOException e) {

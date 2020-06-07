@@ -24,7 +24,6 @@ public class ReadThread implements Runnable {
                 in = new DataInputStream(socket.getInputStream());
                 out = new DataOutputStream(socket.getOutputStream());
                 String receivedMessage = in.readUTF();
-//                System.out.println(receivedMessage);
 
                 //Check every incoming message and perform specific actions accordingly
                 //Opens PlayerOneStage for the client who typed player one
@@ -57,6 +56,9 @@ public class ReadThread implements Runnable {
                 } //Gives a warning to the players if player two is out of attempts
                  else if(receivedMessage.equals("LAST TRY")){
                      writeToAllStages("Last try for player two!");
+                } else if(receivedMessage.equals("FULL")){
+                     gui.readMessages.appendText("There are already two players...");
+                     gui.disable();
                 } else if(!receivedMessage.equals("Received")) {
                     gui.readMessages.appendText(receivedMessage + "\n");
                 }

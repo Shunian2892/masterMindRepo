@@ -12,11 +12,12 @@ public class ClientConnection implements Runnable{
     private ServerGui server;
     private DataInputStream in;
     private DataOutputStream out;
-    private boolean isRunning = true;
+    private boolean isRunning = true, isFull;
 
-    public ClientConnection(Socket socket, ServerGui server){
+    public ClientConnection(Socket socket, ServerGui server, boolean isFull){
         this.socket = socket;
         this.server = server;
+        this.isFull = isFull;
     }
 
     @Override
@@ -32,9 +33,23 @@ public class ClientConnection implements Runnable{
                 server.ta.appendText(receivingMessage + "\n");
                 out.flush();
 
+                //If there are already two players on the server, disconnect the third client after an input
+                if(isFull){
+                    if (receivingMessage.endsWith("player one")){
+                        out.writeUTF("FULL");
+                        continue;
+                    }
+                    if (receivingMessage.endsWith("player two")){
+                        out.writeUTF("FULL");
+                        continue;
+                    }
+                    out.writeUTF("FULL");
+                    remove();
+                }
+
                 //Check if the client wants to disconnect
-                if(receivingMessage.endsWith("quit")){
-                    server.removeClient(this);
+                if(receivingMessage.equals("quit")){
+                    remove();
                 }
 
                 if(receivingMessage.endsWith("rules")){
@@ -95,5 +110,10 @@ public class ClientConnection implements Runnable{
         } catch (IOException e){
             e.printStackTrace();
         }
+    }
+
+    //Remove client form server
+    private void remove(){
+        server.removeClient(this);
     }
 }
