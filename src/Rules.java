@@ -6,7 +6,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
-
+/**
+ * Explanation gui for the game mastermind.
+ */
 public class Rules extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -47,14 +49,6 @@ public class Rules extends Application {
 
         primaryStage.setOnCloseRequest(e -> {
             Platform.exit();
-//            System.exit(0);
         });
-
-
-
-    }
-
-    public void showRules(){
-        launch(Rules.class);
     }
 }

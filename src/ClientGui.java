@@ -10,7 +10,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -19,11 +18,8 @@ public class ClientGui extends Application {
     private String localHost = "localhost";
     private int portNum = 10000;
     private DataOutputStream out = null;
-    private DataInputStream in = null;
 
     private String nickName;
-    boolean codeIsSet = false;
-    private String codeToBreak = "";
     private Stage playerOneStage;
     private Stage playerTwoStage;
     private Stage rulesStage;
@@ -31,6 +27,7 @@ public class ClientGui extends Application {
     public TextField writeMessages;
     private Socket socket;
     private ReadThread threadReader;
+    private Button send;
 
     private PlayerOneStage one;
     private PlayerTwoStage two;
@@ -42,7 +39,7 @@ public class ClientGui extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        //LOGIN SCENE
+        //Login scene
         BorderPane loginPane = new BorderPane();
         TextField loginName = new TextField();
         TextField hostAddress = new TextField(localHost);
@@ -73,10 +70,11 @@ public class ClientGui extends Application {
         primaryStage.setScene(loginScene);
         primaryStage.show();
 
-        //CHAT SCENE
+        //Chat scene
         writeMessages = new TextField();
+        writeMessages.setPrefWidth(500);
         readMessages = new TextArea();
-        Button send = new Button("Send");
+        send = new Button("Send");
 
         BorderPane chatPane = new BorderPane();
         chatPane.setCenter(readMessages);
@@ -85,41 +83,38 @@ public class ClientGui extends Application {
         writeAndSend.setSpacing(30);
         writeAndSend.getChildren().addAll(writeMessages, send);
         chatPane.setBottom(writeAndSend);
-        Scene chatScreen = new Scene(chatPane);
+        Scene chatScreen = new Scene(chatPane, 700, 500);
 
         playerTwoStage = new Stage();
         playerOneStage = new Stage();
         rulesStage = new Stage();
 
-        //BUTTON ACTIONS
-        //LOGIN SCREEN BUTTON ACTION
+        //Button actions
+        //Login screen button actions
         buttonLogin.setOnAction(e -> {
             if(!loginName.getText().isEmpty()){
                 nickName = loginName.getText();
                 try {
                     primaryStage.setScene(chatScreen);
+                    primaryStage.setResizable(false);
 
                     socket = new Socket(localHost, portNum);
                     readMessages.appendText("You are now connected as "+ nickName + " !\n");
                     out = new DataOutputStream(socket.getOutputStream());
-                    in = new DataInputStream(socket.getInputStream());
 
-                    readMessages.appendText("you can now chat!!\n" +
-                                            "type 'player one' to start the game as the Codemaker\n" +
-                                            "type 'player two' to start the game as the Codebreaker\n" +
-                                            "type 'rules' to show the rules of the game\n");
+                    readMessages.appendText("You can now chat!!\n" +
+                                            "Type 'player one' to start the game as the Codemaker\n" +
+                                            "Type 'player two' to start the game as the Codebreaker\n" +
+                                            "Type 'rules' to show the rules of the game\n");
 
                     threadReader = new ReadThread(socket, this);
 
                     Thread t = new Thread(threadReader);
                     t.start();
 
-
                     rules = new Rules();
                     two = new PlayerTwoStage(this.socket);
                     one = new PlayerOneStage(this.socket);
-
-
                 } catch (IOException ex){
                     ex.printStackTrace();
                 }
@@ -127,10 +122,9 @@ public class ClientGui extends Application {
             } else {
                 System.out.println("Please fill in all the boxes!");
             }
-
         });
 
-        //CHAT SCREEN BUTTON ACTIONS
+        //Chat screen button action
         send.setOnAction(e -> {
             if(writeMessages.getText().isEmpty()){
                 return;
@@ -141,7 +135,6 @@ public class ClientGui extends Application {
                 try {
                     out.writeUTF("<" + nickName + "> has disconnected!");
                     writeMessages.setEditable(false);
-//                    primaryStage.close();
                 } catch (IOException ex){
                     ex.printStackTrace();
                 }
@@ -154,13 +147,11 @@ public class ClientGui extends Application {
                 ex.printStackTrace();
             }
         });
-
     }
 
-    //PLAYER ONE STAGE SETUP
+    //Player one stage setup
     protected void playerOneStage() {
         Platform.runLater( () -> {
-
             try{
                 one = new PlayerOneStage(this.socket);
                 one.start(playerOneStage);
@@ -168,29 +159,17 @@ public class ClientGui extends Application {
                 e.printStackTrace();
             }
             one.appendText("Welcome");
-//            stageOneAppendText("Welcome");
         });
-
-    }
-    protected void rulesStage(){
-        Platform.runLater(()->{
-        try {
-            rules.start(rulesStage);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        });
-
     }
 
+    //Append text to the game area of player one
     protected void stageOneAppendText(String text){
         one.gameArea.appendText(text + "\n");
     }
 
-    //PLAYER TWO STAGE SETUP
+    //Player two stage setup
     protected void playerTwoStage() {
         Platform.runLater(() -> {
-
             try {
                 two = new PlayerTwoStage(this.socket);
                 two.start(playerTwoStage);
@@ -198,10 +177,10 @@ public class ClientGui extends Application {
                 e.printStackTrace();
             }
             two.appendText("Welcome");
-//            stageTwoAppendText("Welcome");
         });
     }
 
+    //Append text to the game area of player two
     protected void stageTwoAppendText(String text){
         two.gameArea.appendText(text + "\n");
     }
@@ -210,5 +189,19 @@ public class ClientGui extends Application {
         return nickName;
     }
 
+    //Rules stage setup
+    protected void rulesStage(){
+        Platform.runLater(()->{
+            try {
+                rules.start(rulesStage);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
 
+    protected void disable(){
+        send.setDisable(true);
+        writeMessages.setEditable(false);
+    }
 }

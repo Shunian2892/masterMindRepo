@@ -1,25 +1,27 @@
-import javafx.application.Platform;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
+/**
+ * Reads every message that comes from the socket on which the user is connected to the server, sends it through the sever to other people and scans each message for a specific command.
+ * If there is a specific command given, write this command to the ReadThread class for the action tied to that command.
+ */
 public class ClientConnection implements Runnable{
     private Socket socket;
     private ServerGui server;
     private DataInputStream in;
     private DataOutputStream out;
-    private boolean isRunning = true;
+    private boolean isRunning = true, isFull;
 
-    public ClientConnection(Socket socket, ServerGui server){
+    public ClientConnection(Socket socket, ServerGui server, boolean isFull){
         this.socket = socket;
         this.server = server;
+        this.isFull = isFull;
     }
 
     @Override
     public void run() {
-
         try {
             out = new DataOutputStream(socket.getOutputStream());
             in = new DataInputStream(socket.getInputStream());
@@ -31,10 +33,30 @@ public class ClientConnection implements Runnable{
                 server.ta.appendText(receivingMessage + "\n");
                 out.flush();
 
-                if(receivingMessage.equals("quit")){
-                    server.removeClient(this);
+                //If there are already two players on the server, disconnect the third client after an input
+                if(isFull){
+                    if (receivingMessage.endsWith("player one")){
+                        out.writeUTF("FULL");
+                        continue;
+                    }
+                    if (receivingMessage.endsWith("player two")){
+                        out.writeUTF("FULL");
+                        continue;
+                    }
+                    out.writeUTF("FULL");
+                    remove();
                 }
 
+                //Check if the client wants to disconnect
+                if(receivingMessage.equals("quit")){
+                    remove();
+                }
+
+                if(receivingMessage.endsWith("rules")){
+                    out.writeUTF("RULES");
+                }
+
+                //Check if the player wants to play a game
                 if(receivingMessage.endsWith("player one")){
                     if(!server.isPlayerOne()){
                         server.setPlayerOne(true);
@@ -60,23 +82,27 @@ public class ClientConnection implements Runnable{
                         continue;
                     }
                 }
+
+                //Check if the player closed the game GUI
                 if(receivingMessage.equals("player one closed their game")){
                     server.setPlayerOne(false);
                     continue;
                 }
+
                 if(receivingMessage.equals("player two closed their game")){
                     server.setPlayerTwo(false);
                     continue;
                 }
 
+                //Write a generic answer message to ReadThread such that it knows that the received message doesn't have a specific action linked to it
                 out.writeUTF("Received");
             }
         } catch (IOException e){
             e.printStackTrace();
         }
-
     }
 
+    //Send the whole message to the server
     public void sendMessage(String text){
         try {
             out.writeUTF(text);
@@ -84,5 +110,10 @@ public class ClientConnection implements Runnable{
         } catch (IOException e){
             e.printStackTrace();
         }
+    }
+
+    //Remove client form server
+    private void remove(){
+        server.removeClient(this);
     }
 }

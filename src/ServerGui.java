@@ -9,11 +9,15 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+/**
+ * Start a server on port 10000 and look for clients.
+ * Each connection made is stores in an arrayList such that a message from one person can be send to all the other clients on the server
+ */
 public class ServerGui extends Application {
     private int port = 10000;
     private ServerSocket serverSocket;
     private Socket socket;
-    private boolean playerOne = false, playerTwo = false;
+    private boolean playerOne = false, playerTwo = false, isFull = false;
 
     public TextArea ta;
 
@@ -31,26 +35,26 @@ public class ServerGui extends Application {
         ta.appendText("Starting mastermind server...\n");
         ta.appendText("BackLog of events and messages:\n");
 
+        //Make and start a new thread. Check if conncetions.size is higher than 2, of so, set isFull on true such that new clients can't chat and start a game.
         new Thread( () -> {
             try {
                 this.serverSocket = new ServerSocket(port);
                 boolean isRunning = true;
 
                 while (isRunning) {
+                    ta.appendText("Waiting for client\n");
+                    this.socket = serverSocket.accept();
+                    ta.appendText("Client connected via address: " + socket.getInetAddress().getHostAddress() + "\n");
 
-                    if (connections.size() < 2) {
-                        ta.appendText("Waiting for client\n");
-
-                        this.socket = serverSocket.accept();
-                        ta.appendText("Client connected via address: " + socket.getInetAddress().getHostAddress() + "\n");
-
-                        ClientConnection connection = new ClientConnection(socket, this);
-                        connections.add(connection);
-                        Thread t = new Thread(connection);
-                        t.start();
+                    if(connections.size() > 2){
+                        isFull = true;
                     }
-                }
 
+                    ClientConnection connection = new ClientConnection(socket, this, isFull);
+                    connections.add(connection);
+                    Thread t = new Thread(connection);
+                    t.start();
+                }
                 this.serverSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -58,16 +62,19 @@ public class ServerGui extends Application {
         }).start();
     }
 
+    //Send a message to all clients in the server
     public void sendToAllClients(String text) {
         for (ClientConnection client: connections){
             client.sendMessage(text);
         }
     }
 
+    //Remove a specific client from the server
     public void removeClient(ClientConnection clientConnection){
         this.connections.remove(clientConnection);
     }
 
+    //Getters and Setters of the booleans isPlayerOne and isPlayerTwo
     public synchronized boolean isPlayerOne() {
         return playerOne;
     }
