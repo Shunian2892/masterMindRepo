@@ -23,14 +23,14 @@ public class PlayerTwoStage extends Application {
     private Button setCode;
     private Button clearCode;
 
-    TextArea gameArea = new TextArea();
-    Label colors = new Label("");
+    TextArea gameArea;
+    Label colors;
 
-    private String codeToBreak = "";
-    String colorsUnfinished = "";
-    String colorsFinished = "";
+    private String codeToBreak;
+    String colorsUnfinished;
+    String colorsFinished;
 
-    int amOfColors = 0;
+    int amOfColors;
 
     private Socket socket;
     private DataOutputStream out;
@@ -43,6 +43,14 @@ public class PlayerTwoStage extends Application {
         } catch (IOException e){
             e.printStackTrace();
         }
+        gameArea = new TextArea();
+        colors = new Label("");
+
+        codeToBreak = "";
+        colorsUnfinished = "";
+        colorsFinished = "";
+
+        amOfColors = 0;
     }
 
     @Override
@@ -58,9 +66,9 @@ public class PlayerTwoStage extends Application {
         HBox bottomColors = new HBox();
         VBox allColors = new VBox();
         HBox doneOrClear = new HBox();
-        setCode = new Button("Done");
+        setCode = new Button("send");
         clearCode = new Button("clear");
-        Label yourCode = new Label("Your 4 colored code: ");
+        Label yourCode = new Label("Your guess is: ");
 
         red.setStyle("-fx-background-color: #f54242; ");
         red.setMaxSize(200, 100);
@@ -96,6 +104,13 @@ public class PlayerTwoStage extends Application {
         primaryStage.show();
 
         colorButtonActions();
+        primaryStage.setOnCloseRequest(action->{
+            try {
+                out.writeUTF("player two closed their game");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     //PLAYER TWO STAGE BUTTON ACTIONS
@@ -121,6 +136,7 @@ public class PlayerTwoStage extends Application {
             } catch (IOException e){
                 e.printStackTrace();
             }
+            clearColorCode();
         });
 
         clearCode.setOnAction(action ->{

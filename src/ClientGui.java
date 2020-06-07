@@ -26,6 +26,7 @@ public class ClientGui extends Application {
     private String codeToBreak = "";
     private Stage playerOneStage;
     private Stage playerTwoStage;
+    private Stage rulesStage;
     public TextArea readMessages;
     public TextField writeMessages;
     private Socket socket;
@@ -33,6 +34,7 @@ public class ClientGui extends Application {
 
     private PlayerOneStage one;
     private PlayerTwoStage two;
+    private Rules rules;
 
     public static void main(String[] args) {
         launch(ClientGui.class);
@@ -87,6 +89,7 @@ public class ClientGui extends Application {
 
         playerTwoStage = new Stage();
         playerOneStage = new Stage();
+        rulesStage = new Stage();
 
         //BUTTON ACTIONS
         //LOGIN SCREEN BUTTON ACTION
@@ -97,17 +100,25 @@ public class ClientGui extends Application {
                     primaryStage.setScene(chatScreen);
 
                     socket = new Socket(localHost, portNum);
-                    readMessages.appendText("You are now connected!\n");
+                    readMessages.appendText("You are now connected as "+ nickName + " !\n");
                     out = new DataOutputStream(socket.getOutputStream());
                     in = new DataInputStream(socket.getInputStream());
+
+                    readMessages.appendText("you can now chat!!\n" +
+                                            "type 'player one' to start the game as the Codemaker\n" +
+                                            "type 'player two' to start the game as the Codebreaker\n" +
+                                            "type 'rules' to show the rules of the game\n");
 
                     threadReader = new ReadThread(socket, this);
 
                     Thread t = new Thread(threadReader);
                     t.start();
 
-                    one = new PlayerOneStage(this.socket);
+
+                    rules = new Rules();
                     two = new PlayerTwoStage(this.socket);
+                    one = new PlayerOneStage(this.socket);
+
 
                 } catch (IOException ex){
                     ex.printStackTrace();
@@ -143,6 +154,7 @@ public class ClientGui extends Application {
                 ex.printStackTrace();
             }
         });
+
     }
 
     //PLAYER ONE STAGE SETUP
@@ -150,12 +162,23 @@ public class ClientGui extends Application {
         Platform.runLater( () -> {
 
             try{
+                one = new PlayerOneStage(this.socket);
                 one.start(playerOneStage);
             } catch (Exception e){
                 e.printStackTrace();
             }
             one.appendText("Welcome");
 //            stageOneAppendText("Welcome");
+        });
+
+    }
+    protected void rulesStage(){
+        Platform.runLater(()->{
+        try {
+            rules.start(rulesStage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         });
 
     }
@@ -169,6 +192,7 @@ public class ClientGui extends Application {
         Platform.runLater(() -> {
 
             try {
+                two = new PlayerTwoStage(this.socket);
                 two.start(playerTwoStage);
             } catch (Exception e) {
                 e.printStackTrace();

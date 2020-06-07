@@ -12,11 +12,15 @@ public class Rules extends Application {
     public void start(Stage primaryStage) throws Exception {
         BorderPane pane = new BorderPane();
         TextArea area = new TextArea();
+        area.setMaxSize(1000,50);
+        area.setEditable(false);
         TextArea rules = new TextArea();
+        rules.setMaxSize(1000,200);
+        rules.setEditable(false);
 
         area.setFont(Font.font("Serif", 24));
         area.setText("Rules To MasterMind!");
-        rules.setText("CodeMaker:" +
+        rules.setText("CodeMaker (player one):" +
                 "\nChoose four (4) colors to form a code." +
                 "\nThe CODEBREAKER has to try and guess the code." +
                 "\nAfter each attempt of the CODEBREAKER, the CODEMAKER gives feedback by presenting:" +
@@ -25,7 +29,7 @@ public class Rules extends Application {
                 "\nZero (0) pegs for each color that doesn't exist in the code" +
                 "\n" +
                 "\n" +
-                "\nCodeBreaker:" +
+                "\nCodeBreaker (player two):" +
                 "\nTries to decode the code of the CODEMAKER." +
                 "\nSelects up to four (4) colors in a specific order per turn." +
                 "\nAfter each attempt, the CODEBREAKER receives feedback from the CODEMAKER using black, white, or no pegs." +

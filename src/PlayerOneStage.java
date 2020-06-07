@@ -25,41 +25,38 @@ public class PlayerOneStage extends Application {
     private BorderPane gamePane;
     private VBox allColors;
 
-    TextArea gameArea = new TextArea();
-    private Label colors = new Label("");
+    protected TextArea gameArea;
+    private Label colors;
     private Button setCode;
     private Button clearCode;
 
     private Label feedbackLabel;
 
-    private String codeToBreak = "";
-    private String colorsUnfinished = "";
-    private String colorsFinished = "";
+    private String codeToBreak;
+    private String colorsUnfinished;
+    private String colorsFinished ;
 
-    private String feedback = "";
-    private String feedbackUnfinished = "";
-    private String feedbackFinished = "";
+    private String feedback;
+    private String feedbackUnfinished;
+    private String feedbackFinished;
 
-    private int amOfColors = 0;
-    private int amOfFeedback = 0;
+    private int amOfColors;
+    private int amOfFeedback;
+    private int amOfTurns;
 
-    private boolean hasBeenSet = false;
+    private boolean hasBeenSet;
 
     private Socket socket;
     private DataOutputStream out;
 
     public PlayerOneStage(Socket s){
         this.socket = s;
-
         try {
             out = new DataOutputStream(socket.getOutputStream());
         } catch (IOException e){
             e.printStackTrace();
         }
-    }
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
         red = new Button("RED");
         blue = new Button("BLUE");
         green = new Button(  "GREEN");
@@ -67,13 +64,37 @@ public class PlayerOneStage extends Application {
         yellow = new Button("YELLOW");
         orange = new Button("ORANGE");
         gamePane = new BorderPane();
-        HBox topColors = new HBox();
-        HBox bottomColors = new HBox();
-        HBox doneOrClear = new HBox();
+
+        gameArea = new TextArea();
+        colors = new Label("");
+
         allColors = new VBox();
         setCode = new Button("Done");
         clearCode = new Button("clear");
+
+        codeToBreak = "";
+        colorsUnfinished = "";
+        colorsFinished = "";
+
+        feedback = "";
+        feedbackUnfinished = "";
+        feedbackFinished = "";
+
+        amOfColors = 0;
+        amOfFeedback = 0;
+        amOfTurns = 0;
+
+        hasBeenSet = false;
+
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        HBox topColors = new HBox();
+        HBox bottomColors = new HBox();
+        HBox doneOrClear = new HBox();
         Label yourCode = new Label("Your 4 colored code: ");
+
 
         red.setStyle("-fx-background-color: #f54242; ");
         red.setMaxSize(200, 100);
@@ -109,6 +130,16 @@ public class PlayerOneStage extends Application {
         primaryStage.show();
 
         colorButtonActions();
+
+        //when the stage is closed it writes a messasge
+        primaryStage.setOnCloseRequest(action->{
+            try {
+                out.writeUTF("player one closed their game");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
     }
 
     public void setColorLabel(String text) {
@@ -141,7 +172,7 @@ public class PlayerOneStage extends Application {
 
         Label yourFeedback = new Label("your feedback is: ");
         feedbackLabel = new Label("");
-        Button setFeedback = new Button("done");
+        Button setFeedback = new Button("send");
         Button clearFeedback = new Button("clear");
 
         HBox setOrClear = new HBox();
@@ -164,15 +195,28 @@ public class PlayerOneStage extends Application {
         });
 
         setFeedback.setOnAction(action -> {
+            amOfTurns++;
+            System.out.println(amOfTurns);
             this.feedback = feedbackLabel.getText();
             appendText("your feedback is: " + this.feedback);
 
             try{
                 out.writeUTF("Player one made a move");
                 out.writeUTF("P1: " + this.feedback);
+                //if everything is right it writes a message that the readthread interperts
+                if(this.feedback == "black black black black "){
+                    out.writeUTF("CODEBREAKER");
+                    disable(setFeedback);
+                    disable(clearFeedback);
+                }//12 is the maximum of turns then it writes a messages that the readthread interperts
+                else if(amOfTurns == 12){
+                    out.writeUTF("CODEMAKER");
+                }
             } catch (IOException e){
                 e.printStackTrace();
             }
+            //feedback cleared after sending it
+            clearFeedback();
         });
         clearFeedback.setOnAction(action->{
             clearFeedback();
@@ -195,11 +239,11 @@ public class PlayerOneStage extends Application {
         orange.setOnAction(action ->{ setColorLabel("orange"); });
 
         setCode.setOnAction(action -> {
+
             codeToBreak = colors.getText();
             setCodeToBreak(codeToBreak);
             appendText("CODE HAS BEEN SET!");
             appendText("your code is: " +  codeToBreak);
-
             try{
                 out.writeUTF("Player one made a move");
                 out.writeUTF("P1: CODE HAS BEEN SET!");
@@ -210,9 +254,12 @@ public class PlayerOneStage extends Application {
             hasBeenSet = true;
             disable(setCode);
             disable(clearCode);
+            //create new buttons for feedback
             HBox colorsAndFeedback = new HBox();
             colorsAndFeedback.getChildren().addAll(allColors,getFeedbackLayout());
             gamePane.setBottom(colorsAndFeedback);
+
+
         });
 
         clearCode.setOnAction(action ->{
@@ -254,6 +301,14 @@ public class PlayerOneStage extends Application {
 
     public void disable( Button button){
         button.setDisable(true);
+    }
+
+    public void addTurn (){
+        amOfTurns++;
+    }
+
+    public int getAmOfTurns(){
+        return amOfTurns;
     }
 
 
