@@ -40,8 +40,8 @@ public class ReadThread implements Runnable {
                 } else if (receivedMessage.equals("Player two is taken!")) {
                     out.writeUTF("Player two is already taken!");
                 } //Opens the rules when typed in the chat
-                else if(receivedMessage.equals("rules")){
-                        gui.rulesStage();
+                else if(receivedMessage.equals("RULES")){
+                    gui.rulesStage();
                 }//Sends the messages from player two to player one
                 else if (receivedMessage.startsWith("P2:")){
                     gui.stageOneAppendText(receivedMessage);
@@ -50,16 +50,13 @@ public class ReadThread implements Runnable {
                     gui.stageTwoAppendText(receivedMessage);
                 } //Interprets the text from PlayerOneStage to show that codemaker has won
                 else if(receivedMessage.equals("CODEMAKER")){
-                    gui.stageTwoAppendText("THE WINNER IS THE CODEMAKER");
-                    gui.stageOneAppendText("THE WINNER IS THE CODEMAKER");
+                    writeToAllStages("THE WINNER IS THE CODEMAKER");
                 } //Interprets the text from PlayerOneStage to show that codebreaker has won
                 else if(receivedMessage.equals("CODEBREAKER")){
-                    gui.stageTwoAppendText("THE WINNER IS THE CODEBREAKER");
-                    gui.stageOneAppendText("THE WINNER IS THE CODEBREAKER");
+                    writeToAllStages("THE WINNER IS THE CODEBREAKER");
                 } //Gives a warning to the players if player two is out of attempts
                  else if(receivedMessage.equals("LAST TRY")){
-                    gui.stageTwoAppendText("Last try for player two!");
-                    gui.stageOneAppendText("Last try for player two!");
+                     writeToAllStages("Last try for player two!");
                 } else if(!receivedMessage.equals("Received")) {
                     gui.readMessages.appendText(receivedMessage + "\n");
                 }
@@ -69,5 +66,10 @@ public class ReadThread implements Runnable {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void writeToAllStages(String message){
+        gui.stageTwoAppendText(message);
+        gui.stageOneAppendText(message);
     }
 }

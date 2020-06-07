@@ -33,8 +33,12 @@ public class ClientConnection implements Runnable{
                 out.flush();
 
                 //Check if the client wants to disconnect
-                if(receivingMessage.equals("quit")){
+                if(receivingMessage.endsWith("quit")){
                     server.removeClient(this);
+                }
+
+                if(receivingMessage.endsWith("rules")){
+                    out.writeUTF("RULES");
                 }
 
                 //Check if the player wants to play a game

@@ -19,11 +19,8 @@ public class ClientGui extends Application {
     private String localHost = "localhost";
     private int portNum = 10000;
     private DataOutputStream out = null;
-    private DataInputStream in = null;
 
     private String nickName;
-    boolean codeIsSet = false;
-    private String codeToBreak = "";
     private Stage playerOneStage;
     private Stage playerTwoStage;
     private Stage rulesStage;
@@ -104,7 +101,6 @@ public class ClientGui extends Application {
                     socket = new Socket(localHost, portNum);
                     readMessages.appendText("You are now connected as "+ nickName + " !\n");
                     out = new DataOutputStream(socket.getOutputStream());
-                    in = new DataInputStream(socket.getInputStream());
 
                     readMessages.appendText("You can now chat!!\n" +
                                             "Type 'player one' to start the game as the Codemaker\n" +

@@ -161,7 +161,6 @@ public class PlayerTwoStage extends Application {
                 }
 
                 if (amOfTurns == 12){
-                    out.writeUTF("CODEMAKER");
                     disable(setCode);
                     disable(clearCode);
                 }
